@@ -1,0 +1,96 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ save }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-manufacturer').submit() : false;"><i class="fa fa-trash-o"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-primary"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="form-group d-flex">
+      <label class="control-label" for="form-type">{{ entry_form_type }}</label>
+      <select name="form_type" style="width: 15%;" id="form-type" class="form-control">
+        {% for form_type in form_types %}
+        {% if form_type == selected_type %}
+        <option value="{{ form_type.href }}" selected="selected">{{ form_type.name }}</option>
+        {% else %}
+        <option value="{{ form_type.href }}">{{ form_type.name }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-manufacturer">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="form-table">
+              {# /////////////////////////// #}
+              <thead>
+                <tr>
+                  <td style="width: 400px;" class="text-center"></td>
+                </tr>
+              </thead>
+              <tbody>
+      
+                <tr>
+                  <td class="text-left"></td>
+                </tr>
+              </tbody>
+              {# /////////////////////////// #}
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
+
+
+<script>
+  $('#form-type').on('change', function() {
+    $.get(this.value, function(data, status){
+     
+      $.each(data.success.table, function(i, item) {
+        console.log(item.name)
+        var $tr = $('<tr>').append(
+            $('<td>').text(item.name),
+        ).appendTo('#form-table');
+    });
+     
+    })
+    
+    
+  });
+  {# function val() {
+
+      d = document.getElementById("form-type").value;
+      alert(d);
+  } #}
+</script>

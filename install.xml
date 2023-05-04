@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Nx Calculator</name>
+    <version>1.0.9</version>
+    <author>Seyidov Murad</author>
+    <code>nx_calculator</code>
+    <description>Create your own forms to calculate prices</description>
+    <file path="admin/controller/common/column_left.php">
+        <operation>
+            <search><![CDATA[// System]]></search>
+            <add position="before"><![CDATA[
+                
+                if ($this->user->hasPermission('access', 'extension/module/nx_calculator')) {
+                    $this->load->language('extension/module/nx_calculator');
+                    $data['menus'][] = array(
+                        'id'       => 'menu-nx-calculator',
+                        'icon'	   => 'fas fa-calculator',
+                        'href'     => $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'], true),
+                        'name'	   => $this->language->get('text_nxc'),
+                        'children' => array()
+                    );
+                }    
+            ]]></add>
+        </operation>
+    </file>
+    </modification>

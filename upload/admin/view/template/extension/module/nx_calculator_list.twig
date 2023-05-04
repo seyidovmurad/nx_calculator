@@ -1,0 +1,118 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container">
+      <div class="pull-right">
+        <button type="submit" form="form-news" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container">
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {# ///////////////////////// #}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_add_r }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ route_action }}" method="post" enctype="multipart/form-data"  class="form-horizontal" id="form-route">
+          {# ///////////////////// #}
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-name">{{ route_name }}s</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" required="required" placeholder="{{ route_name }}" id="input-name"  value="{{ route.name ? route.name : '' }}" class="form-control" />
+              {% if error_warning.name %}
+              <div class="text-danger">{{ error_warning.name }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {# ///////////////////// #}
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-name">{{ route_id }}s</label>
+            <div class="col-sm-10">
+              <input type="text" name="html_id" required="required" placeholder="{{ route_id }}" id="input-name"  value="{{ route.html_id ? route.html_id : '' }}" class="form-control" />
+              {% if error_warning.html_id %}
+              <div class="text-danger">{{ error_warning.html_id }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-name">{{ route_url }}s</label>
+            <div class="col-sm-10">
+              <input type="text" name="url" required="required" placeholder="{{ route_url }}" id="input-name"  value="{{ route.url ? route.url : '' }}" class="form-control" />
+              {% if error_warning.url %}
+              <div class="text-danger">{{ error_warning.url }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div style="display: flex; justify-content: end;">
+            <button type="submit" form="form-route" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" >Add Route</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {# ///////////////////////// #}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_add }}</h3>
+      </div>
+      <div class="panel-body">
+        
+         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-news" class="form-horizontal">
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="input-name">{{ form_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" required placeholder="{{ form_name }}" id="input-name"  value="{{ form.name ? form.name : '' }}" class="form-control" />
+              {% if error_name %}
+              <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-name">{{ form_formula }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="formula" placeholder="{{ form_formula }}" id="input-name" class="form-control"  value="{{ link.formula ? link.formula : '' }}"/>
+              {% if error_name %}
+                <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-status">{{ form_value }}</label>
+              <div class="col-sm-10">
+                <select name="value" id="input-status" class="form-control">
+                  <option value="1">Discount</option>
+                  <option value="0" selected="selected">Price</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-status">{{ form_status }}</label>
+              <div class="col-sm-10">
+                <select name="status" id="input-status" class="form-control">
+                  {% if form.status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
