@@ -15,7 +15,7 @@
                     $data['menus'][] = array(
                         'id'       => 'menu-nx-calculator',
                         'icon'	   => 'fas fa-calculator',
-                        'href'     => $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'], true),
+                        'href'     => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'], true),
                         'name'	   => $this->language->get('text_nxc'),
                         'children' => array()
                     );

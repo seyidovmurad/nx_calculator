@@ -26,45 +26,78 @@
       <div class="panel-body">
         
          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-news" class="form-horizontal">
-          <div class="form-group required">
-            <label class="col-sm-2 control-label" for="input-name">{{ form_name }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="nxc_formula_id" required placeholder="Formula" id="input-name"  value="{{ form.name ? form.name : '' }}" class="form-control" />
-              {% if error_name %}
-              <div class="text-danger">{{ error_name }}</div>
-              {% endif %}
+          
+           <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-table">{{ form_table_type }}</label>
+              <div class="col-sm-10">
+                <select name="table" id="input-table" class="form-control">
+                  <option value="-1">-</option>
+                  {% for table in tables %}
+                    <option value="{{table.id}}">{{table.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-name">{{ form_formula }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="nxc_route_id" placeholder="Route" id="input-name" class="form-control"  value="{{ link.formula ? link.formula : '' }}"/>
-              {% if error_name %}
-                <div class="text-danger">{{ error_name }}</div>
-              {% endif %}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-route">{{ form_route }}</label>
+              <div class="col-sm-10">
+                <select name="nxc_route_id" id="input-route" class="form-control">
+                  <option value="-1">-</option>
+                  {% for route in routes %}
+                    <option value="{{route.nxc_route_id}}">{{route.name}} #{{route.html_id}}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-name">{{ form_formula }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="table_id" placeholder="Table" id="input-name" class="form-control"  value="{{ link.formula ? link.formula : '' }}"/>
-              {% if error_name %}
-                <div class="text-danger">{{ error_name }}</div>
-              {% endif %}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-formula">{{ form_formula }}</label>
+              <div class="col-sm-10">
+                <select name="nxc_formula_id" id="input-formula" class="form-control">
+                  <option value="-1">-</option>
+                  {% for formula in formulas %}
+                    <option value="{{formula.nxc_formula_id}}">{{formula.name}} -> {{formula.formula}}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-name">{{ form_formula }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="table" placeholder="Type product-0" id="input-name" class="form-control"  value="{{ link.formula ? link.formula : '' }}"/>
-              {% if error_name %}
-                <div class="text-danger">{{ error_name }}</div>
-              {% endif %}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-status">{{ form_table }}</label>
+              <div class="col-sm-10">
+                
+                <select name="table_id" id="input-status" class="form-control">
+                  <option value="-1">-</option>
+                  
+                </select>
+              </div>
             </div>
-          </div>
         </form>
       </div>
     </div>
   </div>
 </div>
 {{ footer }}
+<script>
+  $(function() {
+      $('#input-table').on('change', function() {
+       $.ajax({
+              url: 'index.php?route=extension/module/nx_calculator/type&user_token=kZF34pPCtgX28Y51UR50QWca1Bi3WyUe&type='+this.value,
+              type: 'get',
+              success: function(json) {
+                if(json.success) {
+                  $('#input-status').empty();
+                  for(let i = 0; i < json.table.length; i++) {
+                    let table = json.table[i];
+                    $('#input-status').append($('<option>', { 
+                        value: table.id,
+                        text : table.name 
+                    }));
+                  }
+                }
+              },
+              error: function(error) {
+                alert(error);
+              }
+          });
+      });
+  });
+</script>

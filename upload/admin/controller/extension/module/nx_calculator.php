@@ -39,15 +39,12 @@
                 'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
             );
     
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('text_module'),
-                'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-            );
     
             $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('heading_title'),
                 'href' => $this->url->link('extension/module/nx_calculator', 'user_token=' . $this->session->data['user_token'], true)
             );
+            
             
             $data['action'] = $this->url->link('extension/module/nx_calculator', 'user_token=' . $this->session->data['user_token'], true);
 
@@ -80,7 +77,10 @@
             
             $this->load->model('extension/module/nx_calculator');
             $data['routes'] = $this->model_extension_module_nx_calculator->getRoutes();
-            
+            $data['formulas'] = $this->model_extension_module_nx_calculator->getFormulas();
+            $data['tables'] = [['id' => 0, 'name' => $this->language->get('table_product')], ['id' => 1, 'name' => $this->language->get('table_category')], ['id' => 2, 'name' => $this->language->get('table_brand')]];
+
+            $data['autocomp_api'] = $this->url->link('admin/index.php?route=extension/module/nx_calculator/autocomplete', 'user_token='.$this->session->data['user_token'], true);
             $data['heading_title'] = $this->language->get('heading_title');
 		
 
@@ -95,17 +95,18 @@
                 'text' => $this->language->get('text_home'),
                 'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
             );
-    
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('text_module'),
-                'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-            );
+
     
             $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/nx_calculator', 'user_token=' . $this->session->data['user_token'], true)
+                'href' => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'], true)
             );
             
+            $data['breadcrumbs'][] = array(
+                'text' => $this->language->get('heading_table'),
+                'href' => $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'], true)
+            );
+
             //action
             $data['route_action'] = $this->url->link('extension/module/nx_calculator/route', 'user_token='.$this->session->data['user_token'], true);
             $data['action'] = $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'], true);
@@ -130,13 +131,20 @@
                 <script>
                 $( window ).on( \'load\', function() {
                     $.ajax({
-                          url: \'index.php?route=extension/module/nx_calculator/calc&product_id={{ product_id }}\',
+                          url: \'index.php?route=extension/module/nx_calculator/calc&product_id={{ product_id }}&url='.$url.'\',
                           type: \'get\',
                           success: function(json) {
                             const data = JSON.parse(json);
-                            let str = data.nxc.formula.replace(/[^-()\d/*+.]/g, \'\');
-                            const calc = eval(str); 
-                            $(`#${data.nxc.html_id}`).text(calc);
+                           
+                            for(let i = 0; i < data.nxc.length; i++) {
+                                let n = data.nxc[i];
+                                
+                                let str = n.formula.replace(/[^-()\d/*+.]/g, \'\');
+                                const calc = eval(str);
+                                
+                                const num = (Math.round(calc * 100) / 100).toFixed(2)
+                                $(`#${n.html_id}`).append(num);
+                            }
                           }
                       });
                   } );
@@ -171,16 +179,17 @@
                 'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
             );
     
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('text_module'),
-                'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-            );
+            
     
             $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/nx_calculator', 'user_token=' . $this->session->data['user_token'], true)
+                'href' => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'], true)
             );
             
+            $data['breadcrumbs'][] = array(
+                'text' => $this->language->get('heading_new'),
+                'href' => $this->url->link('extension/module/nx_calculator/list', 'user_token=' . $this->session->data['user_token'], true)
+            );
             //action
             $data['route_action'] = $this->url->link('extension/module/nx_calculator/route', 'user_token='.$this->session->data['user_token'], true);
             $data['action'] = $this->url->link('extension/module/nx_calculator/formula', 'user_token=' . $this->session->data['user_token'], true);
@@ -216,27 +225,55 @@
         }
 
         public function type() {
-            $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
             
             $json = array();
             if (($this->request->server['REQUEST_METHOD'] == 'GET') && $this->validate()) {
                 if(isset($this->request->get['type'])) {
-                    $type = strtolower($this->request->get['type']);
-                    $json['success'] = $this->getList($type); 
+                    $this->load->model('extension/module/nx_calculator');
+                    $query = $this->model_extension_module_nx_calculator->getTable($this->request->get['type']);
+                    $json['table'] = $query;
+                    $json['success'] = true;
                 }
                 else {
                     $json['error'] = 'empty query parameter';
+                    $json['success'] = false;
                 }
             }
             else {
                 $json['error'] = 'Not found.';
+                $json['success'] = false;
             }
 
             $this->response->addHeader('Content-Type: application/json');
 		    $this->response->setOutput(json_encode($json));
         }
 
-        protected function getList($type) {
+
+        public function autocomplete() {
+            $json = array();
+            if(($this->request->server['REQUEST_METHOD'] == 'GET') && $this->validate()) {
+                $term = $this->request->get['term'];
+
+                $this->load->model('extension/module/nx_calculator');
+                $query = $this->model_extension_module_nx_calculator->autoComplete($term);
+                
+                if(count($query) > 0){ 
+                    foreach($query as $row){ 
+                        $data['id'] = $row['id']; 
+                        $data['value'] = $row['name']; 
+                        array_push($json, $data); 
+                    } 
+                } 
+            }
+            $this->response->addHeader('Content-Type: application/json');
+		    $this->response->setOutput(json_encode($json));
+        }
+
+        public function table() {
+            $this->load->language('extension/module/nx_calculator');
+
+            $this->document->setTitle($this->language->get('heading_title'));
+            $this->load->model('extension/module/nx_calculator');
     
             if (isset($this->request->get['page'])) {
                 $page = (int)$this->request->get['page'];
@@ -246,137 +283,85 @@
     
             $url = '';
     
+            
             if (isset($this->request->get['page'])) {
                 $url .= '&page=' . $this->request->get['page'];
             }
     
-            $data['table'] = array();
-    
-            $filter_data = array(
-                'start' => ($page - 1) * $this->config->get('config_limit_admin'),
-                'limit' => $this->config->get('config_limit_admin')
-            );
-    
-            if($type == 'category') {
-                $this->load->model('catalog/category');
-                $category_total = $this->model_catalog_category->getTotalCategories();
-    
-                $results = $this->model_catalog_category->getCategories($filter_data);
-                $data['table_head'] = ['Id', 'Name', 'Action'];
-                foreach ($results as $result) {
-                    $data['table'][] = array(
-                        'category_id' => $result['category_id'],
-                        'name'        => $result['name'],
-                        'edit'        => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true),
-                        'delete'      => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true)
-                    );
-                }
-            
-                $pagination = new Pagination();
-                $pagination->total = $category_total;
-                $pagination->page = $page;
-                $pagination->limit = $this->config->get('config_limit_admin');
-                $pagination->url = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
-        
-                $data['pagination'] = $pagination->render();
-        
-                $data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($category_total - $this->config->get('config_limit_admin'))) ? $category_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $category_total, ceil($category_total / $this->config->get('config_limit_admin')));
-            }
-            else if($type == 'product') {
-                $this->load->model('catalog/product');
-                $product_total = $this->model_catalog_product->getTotalProducts();
-    
-                $results = $this->model_catalog_product->getProducts($filter_data);
-                $data['table_head'] = ['Id', 'Image', 'Name', 'Action'];
-                foreach ($results as $result) {
-                    $data['table'][] = array(
-                        'product_id' => $result['product_id'],
-                        'name'        => $result['name'],
-                        'image'        => $result['image']
-                    );
-                }
-            
-                $pagination = new Pagination();
-                $pagination->total = $product_total;
-                $pagination->page = $page;
-                $pagination->limit = $this->config->get('config_limit_admin');
-                $pagination->url = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
-        
-                $data['pagination'] = $pagination->render();
-        
-                $data['results'] = sprintf($this->language->get('text_pagination'), ($product_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($product_total - $this->config->get('config_limit_admin'))) ? $product_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $product_total, ceil($product_total / $this->config->get('config_limit_admin')));
-            }
-            else  {
-                $this->load->model('catalog/category');
-                $category_total = $this->model_catalog_category->getTotalCategories();
-    
-                $results = $this->model_catalog_category->getCategories($filter_data);
-                $data['table_head'] = ['Id', 'Name', 'Action'];
-                foreach ($results as $result) {
-                    $data['table'][] = array(
-                        'category_id' => $result['category_id'],
-                        'name'        => $result['name'],
-                        'edit'        => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true),
-                        'delete'      => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true)
-                    );
-                }
-            
-                $pagination = new Pagination();
-                $pagination->total = $category_total;
-                $pagination->page = $page;
-                $pagination->limit = $this->config->get('config_limit_admin');
-                $pagination->url = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
-        
-                $data['pagination'] = $pagination->render();
-        
-                $data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($category_total - $this->config->get('config_limit_admin'))) ? $category_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $category_total, ceil($category_total / $this->config->get('config_limit_admin')));
-            }
-            return $data;
-        }
-
-        public function table() {
-            $this->load->language('extension/module/nx_calculator');
-            $this->document->setTitle($this->language->get('heading_title'));
-            
-            $data['form_types'] = array();
-            $data['form_types'][] = array(
-                'name' => 'Category',
-                'href' => $this->url->link('extension/module/nx_calculator/type', 'user_token=' . $this->session->data['user_token'] . '&type=category', true)
-            );
-            $data['form_types'][] = array(
-                'name' => 'Product',
-                'href' => $this->url->link('extension/module/nx_calculator/type', 'user_token=' . $this->session->data['user_token'] . '&type=product', true)
-            );
-            $data['form_types'][] = array(
-                'name' => 'Brand',
-                'href' => $this->url->link('extension/module/nx_calculator/type', 'user_token=' . $this->session->data['user_token'] . '&type=brand', true)
-            );
-            
-            $data['selected_type'] = $data['form_types'][0];
-            
             $data['breadcrumbs'] = array();
+    
             $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('text_home'),
                 'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
             );
     
             $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('text_formula'),
-                'href' => $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'], true)
-            );
-            $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'], true)
+                'href' => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'] . $url, true)
             );
+
             
+
+            $data['add'] = $this->url->link('extension/module/nx_calculator/list', 'user_token=' . $this->session->data['user_token'] . $url, true);
+            $data['delete'] = $this->url->link('extension/module/nx_calculator/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+            $data['add_to_table'] = $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'] . $url, true);
+
+            $data['forms'] = array();
+
+             
+            $filter_data = array(
+                'start' => ($page - 1) * $this->config->get('config_limit_admin'),
+                'limit' => $this->config->get('config_limit_admin')
+            );
+
+            $forms_total = $this->model_extension_module_nx_calculator->getTotalFormulas();
     
-            $data['column_left'] = $this->load->controller('common/column_left');
-            $data['column_right'] = $this->load->controller('common/column_right');
-            $data['content_top'] = $this->load->controller('common/content_top');
-            $data['content_bottom'] = $this->load->controller('common/content_bottom');
-            $data['footer'] = $this->load->controller('common/footer');
+            $results = $this->model_extension_module_nx_calculator->getFormulas($filter_data);
+
+            foreach ($results as $result) {
+                $data['forms'][] = array(
+                    'nxc_formula_id' => $result['nxc_formula_id'],
+                    'name'        => $result['name'],
+                    'formula'  => $result['formula'],
+                    'edit'        => $this->url->link('extension/module/nx_calculator/edit', 'user_token=' . $this->session->data['user_token'] . '&nxc_formula_id=' . $result['nxc_formula_id'] . $url, true),
+                    'delete'      => $this->url->link('extension/module/nx_calculator/delete', 'user_token=' . $this->session->data['user_token'] . '&nxc_formula_id=' . $result['nxc_formula_id'] . $url, true)
+                );
+            }
+
+            if (isset($this->error['warning'])) {
+                $data['error_warning'] = $this->error['warning'];
+            } else {
+                $data['error_warning'] = '';
+            }
+    
+            if (isset($this->session->data['success'])) {
+                $data['success'] = $this->session->data['success'];
+    
+                unset($this->session->data['success']);
+            } else {
+                $data['success'] = '';
+            }
+    
+            if (isset($this->request->post['selected'])) {
+                $data['selected'] = (array)$this->request->post['selected'];
+            } else {
+                $data['selected'] = array();
+            }
+
+            $pagination = new Pagination();
+            $pagination->total = $forms_total;
+            $pagination->page = $page;
+            $pagination->limit = $this->config->get('config_limit_admin');
+            $pagination->url = $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token']. '&page={page}', true);
+        
+            $data['pagination'] = $pagination->render();
+    
+            $data['results'] = sprintf($this->language->get('text_pagination'), ($forms_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($forms_total - $this->config->get('config_limit_admin'))) ? $forms_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $forms_total, ceil($forms_total / $this->config->get('config_limit_admin')));
+    
+        
             $data['header'] = $this->load->controller('common/header');
-    
+            $data['column_left'] = $this->load->controller('common/column_left');
+            $data['footer'] = $this->load->controller('common/footer');
     
             $this->response->setOutput($this->load->view('extension/module/nxc_table', $data));
         }
@@ -423,32 +408,10 @@
                 `nxc_route_id` int(11) NOT NULL,
                 `table_id` int(11) NOT NULL,
                 `priority` int(11),
+                `status` tinyint(1),
                 `table` tinyint(1) NOT NULL,
                 PRIMARY KEY (`nxc_formula_table_id`))"
             );
-
-            // $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "nx_calculator`");
-            // $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "nx_calc_category`");
-
-            // $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "nx_calculator` (
-            //     `nx_calculator_id` int(11) NOT NULL AUTO_INCREMENT,
-            //     `output_id` varchar(50),
-            //     `name` varchar(50),
-            //     `url` varchar(250),
-            //     `formula` varchar(270),
-            //     `status` tinyint(1) NOT NULL,
-            //     PRIMARY KEY (`nx_calculator_id`))"
-            // );
-
-            // $this->db->query("CREATE TABLE IF NOT EXISTS `".DB_PREFIX."nx_calc_category` (
-            //     `nx_calc_category_id` int(11) NOT NULL AUTO_INCREMENT,
-            //     `category_id` int(11) NOT NULL,
-            //     `nx_calculator_id` int(11) NOT NULL,
-            //     `exception` text,
-            //     PRIMARY KEY (`nx_calc_category_id`),
-            //     FOREIGN KEY (`nx_calculator_id`) REFERENCES `".DB_PREFIX."nx_calculator` (`nx_calculator_id`),
-            //     FOREIGN KEY (`category_id`) REFERENCES `".DB_PREFIX."category` (`category_id`)
-            // ) ");
 
             $this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/nx_calculator');
             $this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/nx_calculator');

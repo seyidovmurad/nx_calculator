@@ -1,6 +1,8 @@
 <?php
 // Heading
     $_['heading_title']    = 'Nx Calculator';
+    $_['heading_new'] = 'New Formula';
+    $_['heading_table'] = 'New Table';
 
     $_['text_module']      = 'Modules';
     $_['text_success']     = 'Success: You have modified Nx Calculator!';
@@ -32,3 +34,22 @@
      $_['form_formula']       = 'Formula';
      $_['form_route']       = 'Formula Route';
      $_['form_value']       = 'Formula Value';
+     $_['form_table']       = 'Formula Table';
+     $_['form_table_type']       = 'Formula Table Type';
+
+
+     //table
+     $_['table_product'] = 'Product';
+     $_['table_category'] = 'Category';
+     $_['table_brand'] = 'Brand';
+
+
+     //column
+     $_['column_name'] = 'Name';
+     $_['column_status'] = 'Status';
+     $_['column_action'] = 'Action';
+     $_['column_formula'] = 'Formula';
+
+
+     //button
+     $_['button_table'] = 'Add new formula to table';
