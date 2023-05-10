@@ -82,7 +82,7 @@
 
             $data['autocomp_api'] = $this->url->link('admin/index.php?route=extension/module/nx_calculator/autocomplete', 'user_token='.$this->session->data['user_token'], true);
             $data['heading_title'] = $this->language->get('heading_title');
-		
+            $data['token'] = $this->session->data['user_token'];
 
             if (isset($this->error['warning'])) {
                 $data['error_warning'] = $this->error['warning'];
@@ -121,52 +121,49 @@
             
         }
         
-        private function addJSToFile($url) {
+        // private function addJSToFile($url) {
            
-            $this->load->model('extension/module/nx_calculator');
-            $isexist = $this->model_extension_module_nx_calculator->routeExist($url);
-            if(!$isexist) {
-                $myfile = fopen("../catalog/view/theme/$url.twig", "a") or die("Unable to open file!");
-                $txt = '
-                <script>
-                $( window ).on( \'load\', function() {
-                    $.ajax({
-                          url: \'index.php?route=extension/module/nx_calculator/calc&product_id={{ product_id }}&url='.$url.'\',
-                          type: \'get\',
-                          success: function(json) {
-                            const data = JSON.parse(json);
+        //     $this->load->model('extension/module/nx_calculator');
+        //     $isexist = $this->model_extension_module_nx_calculator->routeExist($url);
+        //     if(!$isexist) {
+        //         $myfile = fopen("$url.twig", "a") or die("Unable to open file!");
+        //         $txt = '
+        //         <script>
+        //         $( window ).on( \'load\', function() {
+        //             $.ajax({
+        //                   url: \'index.php?route=extension/module/nx_calculator/calc&product_id={{ product_id }}&url='.$url.'\',
+        //                   type: \'get\',
+        //                   success: function(json) {
+        //                     const data = JSON.parse(json);
                            
-                            for(let i = 0; i < data.nxc.length; i++) {
-                                let n = data.nxc[i];
+        //                     for(let i = 0; i < data.nxc.length; i++) {
+        //                         let n = data.nxc[i];
                                 
-                                let str = n.formula.replace(/[^-()\d/*+.]/g, \'\');
-                                const calc = eval(str);
+        //                         let str = n.formula.replace(/[^-()\d/*+.]/g, \'\');
+        //                         const calc = eval(str);
                                 
-                                const num = (Math.round(calc * 100) / 100).toFixed(2)
-                                $(`#${n.html_id}`).append(num);
-                            }
-                          }
-                      });
-                  } );
-                  </script>';
-                fwrite($myfile, $txt);
-                fclose($myfile);
-                $this->model_extension_module_nx_calculator->addRouteToExistingRoute($url);
-            }
-        }
+        //                         const num = (Math.round(calc * 100) / 100).toFixed(2)
+        //                         $(`#${n.html_id}`).append(num);
+        //                     }
+        //                   }
+        //               });
+        //           } );
+        //           </script>';
+        //         fwrite($myfile, $txt);
+        //         fclose($myfile);
+        //         $this->model_extension_module_nx_calculator->addRouteToExistingRoute($url);
+        //     }
+        // }
 
         public function list() {
             $this->load->language('extension/module/nx_calculator');
             $this->document->setTitle($this->language->get('heading_title'));
 
-
-            
             $this->load->model('extension/module/nx_calculator');
             $data['routes'] = $this->model_extension_module_nx_calculator->getRoutes();
             
             $data['heading_title'] = $this->language->get('heading_title');
 		
-
             if (isset($this->error['warning'])) {
                 $data['error_warning'] = $this->error['warning'];
             } else {
@@ -200,8 +197,8 @@
             $data['column_left'] = $this->load->controller('common/column_left');
             $data['footer'] = $this->load->controller('common/footer');
             $data['header'] = $this->load->controller('common/header');
-    
-    
+            $data['calculator'] = $this->load->view('extension/module/nxc_element');
+            
             $this->response->setOutput($this->load->view('extension/module/nx_calculator_list', $data));
         }
 
@@ -210,7 +207,7 @@
                
                 $this->load->model('extension/module/nx_calculator');
                 $this->model_extension_module_nx_calculator->addRoute($this->request->post);
-                $this->addJSToFile($this->request->post['url']);
+                //$this->addJSToFile($this->request->post['url']);
             }
 
             $this->list();
@@ -218,6 +215,7 @@
 
         public function formula() {
             if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+                $this->request->post['formula'] = preg_replace('/undefined$/', '', $this->request->post['formula']);
                 $this->load->model('extension/module/nx_calculator');
                 $this->model_extension_module_nx_calculator->addFormula($this->request->post);
             }
@@ -230,7 +228,8 @@
             if (($this->request->server['REQUEST_METHOD'] == 'GET') && $this->validate()) {
                 if(isset($this->request->get['type'])) {
                     $this->load->model('extension/module/nx_calculator');
-                    $query = $this->model_extension_module_nx_calculator->getTable($this->request->get['type']);
+                    $id = isset($this->request->get['formula_id']) ? $this->request->get['formula_id'] : -1;
+                    $query = $this->model_extension_module_nx_calculator->getTable($this->request->get['type'], $id);
                     $json['table'] = $query;
                     $json['success'] = true;
                 }
@@ -248,6 +247,87 @@
 		    $this->response->setOutput(json_encode($json));
         }
 
+        public function edit() {
+            $this->load->language('extension/module/nx_calculator');
+            $this->document->setTitle($this->language->get('heading_title'));
+
+            
+            
+            $data['heading_title'] = $this->language->get('heading_title');
+            $id = -1;
+            $this->load->model('extension/module/nx_calculator');
+            if(($this->request->server['REQUEST_METHOD'] == 'GET') && $this->validate() && isset($this->request->get['nxc_formula_id'])) {
+                $id = $this->request->get['nxc_formula_id'];
+            }
+            if(($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()){
+                
+                if(isset($this->request->post['delete'])) {
+                    $id = $this->request->get['nxc_formula_id'];
+                    $this->model_extension_module_nx_calculator->deleteTable($this->request->post['selected'], $id, $this->request->post['table']);
+                }
+                else {
+                    $id = $this->request->post['formula_id'];
+                    $this->request->post['formula'] = preg_replace('/undefined$/', '', $this->request->post['formula']);
+                    $this->model_extension_module_nx_calculator->editFormula($this->request->post);
+                }
+               
+            }
+
+            
+            $formula = $this->model_extension_module_nx_calculator->getFormula($id);
+            $data['products'] = $this->model_extension_module_nx_calculator->getProducts($id);
+            $data['formula'] = $formula;
+            $data['calc'] = $formula['formula'];
+            $data['faction'] = $this->url->link('extension/module/nx_calculator/edit', 'user_token='.$this->session->data['user_token'] . "&nxc_formula_id=$id", true);
+
+            if (isset($this->error['warning'])) {
+                $data['error_warning'] = $this->error['warning'];
+            } else {
+                $data['error_warning'] = '';
+            }
+            $data['token'] = $this->session->data['user_token'];
+            $data['breadcrumbs'] = array();
+            $data['breadcrumbs'][] = array(
+                'text' => $this->language->get('text_home'),
+                'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+            );
+    
+            
+    
+            $data['breadcrumbs'][] = array(
+                'text' => $this->language->get('heading_title'),
+                'href' => $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'], true)
+            );
+            
+            $data['breadcrumbs'][] = array(
+                'text' => $this->language->get('heading_edit'),
+                'href' => $this->url->link('extension/module/nx_calculator/edit', 'user_token=' . $this->session->data['user_token'], true)
+            );
+            //action
+            
+            $data['action'] = $this->url->link('extension/module/nx_calculator/formula', 'user_token=' . $this->session->data['user_token'], true);
+            $data['delete'] = $this->url->link('extension/module/nx_calculator/edit', 'user_token='.$this->session->data['user_token'].'&nxc_formula_id='.$formula['nxc_formula_id'], true);
+		    $data['cancel'] = $this->url->link('extension/module/nx_calculator/table', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+           
+            
+            $data['column_left'] = $this->load->controller('common/column_left');
+            $data['footer'] = $this->load->controller('common/footer');
+            $data['header'] = $this->load->controller('common/header');
+            $data['calculator'] = $this->load->view('extension/module/nxc_element', $data);
+            
+            $this->response->setOutput($this->load->view('extension/module/nxc_edit', $data));
+        }
+
+        public function delete() {
+            if(($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+                    
+                    $this->load->model('extension/module/nx_calculator');
+                    $query = $this->model_extension_module_nx_calculator->delete($this->request->post['selected']);
+            }
+            $this->table();
+        }
+
+       
 
         public function autocomplete() {
             $json = array();
@@ -304,6 +384,7 @@
 
             $data['add'] = $this->url->link('extension/module/nx_calculator/list', 'user_token=' . $this->session->data['user_token'] . $url, true);
             $data['delete'] = $this->url->link('extension/module/nx_calculator/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+            $data['rdelete'] = $this->url->link('extension/module/nx_calculator/deleteRoute', 'user_token=' . $this->session->data['user_token'] . $url, true);
             $data['add_to_table'] = $this->url->link('extension/module/nx_calculator/formulas', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
             $data['forms'] = array();
@@ -325,6 +406,17 @@
                     'formula'  => $result['formula'],
                     'edit'        => $this->url->link('extension/module/nx_calculator/edit', 'user_token=' . $this->session->data['user_token'] . '&nxc_formula_id=' . $result['nxc_formula_id'] . $url, true),
                     'delete'      => $this->url->link('extension/module/nx_calculator/delete', 'user_token=' . $this->session->data['user_token'] . '&nxc_formula_id=' . $result['nxc_formula_id'] . $url, true)
+                );
+            }
+
+            $results = $this->model_extension_module_nx_calculator->getRoutes($filter_data);
+
+            foreach ($results as $result) {
+                $data['routes'][] = array(
+                    'nxc_route_id' => $result['nxc_route_id'],
+                    'name'        => $result['name'],
+                    'html_id'  => $result['html_id'],
+                    'delete'      => $this->url->link('extension/module/nx_calculator/deleteRoute', 'user_token=' . $this->session->data['user_token'] . '&nxc_route_id=' . $result['nxc_route_id'] . $url, true)
                 );
             }
 
@@ -364,6 +456,15 @@
             $data['footer'] = $this->load->controller('common/footer');
     
             $this->response->setOutput($this->load->view('extension/module/nxc_table', $data));
+        }
+
+        public function deleteRoute() {
+            if(($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+                
+                $this->load->model('extension/module/nx_calculator');
+                $query = $this->model_extension_module_nx_calculator->deleteRoute($this->request->post['selected']);
+            }
+            $this->table();
         }
 
         public function install() {
@@ -433,4 +534,4 @@
         }
 
 
-    }
+    }       

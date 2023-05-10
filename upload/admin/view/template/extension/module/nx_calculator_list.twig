@@ -13,7 +13,7 @@
       </ul>
     </div>
   </div>
-  <div class="container">
+  <div class="container" >
     {% if error_warning %}
     <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -24,7 +24,7 @@
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_add_r }}</h3>
       </div>
-      <div class="panel-body">
+      <div class="panel-body" >
         <form action="{{ route_action }}" method="post" enctype="multipart/form-data"  class="form-horizontal" id="form-route">
           {# ///////////////////// #}
           <div class="form-group required">
@@ -46,7 +46,7 @@
               {% endif %}
             </div>
           </div>
-          <div class="form-group required">
+          {# <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-name">{{ route_url }}s</label>
             <div class="col-sm-10">
               <input type="text" name="url" required="required" placeholder="{{ route_url }}" id="input-name"  value="{{ route.url ? route.url : '' }}" class="form-control" />
@@ -54,9 +54,9 @@
               <div class="text-danger">{{ error_warning.url }}</div>
               {% endif %}
             </div>
-          </div>
+          </div> #}
           <div style="display: flex; justify-content: end;">
-            <button type="submit" form="form-route" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" >Add Route</button>
+            <button type="submit"  form="form-route" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" >Add Route</button>
           </div>
         </form>
       </div>
@@ -78,15 +78,7 @@
               {% endif %}
             </div>
           </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-name">{{ form_formula }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="formula" placeholder="{{ form_formula }}" id="input-name" class="form-control"  value="{{ link.formula ? link.formula : '' }}"/>
-              {% if error_name %}
-                <div class="text-danger">{{ error_name }}</div>
-              {% endif %}
-            </div>
-          </div>
+          
           <div class="form-group">
               <label class="col-sm-2 control-label" for="input-status">{{ form_value }}</label>
               <div class="col-sm-10">
@@ -108,6 +100,12 @@
                   <option value="0" selected="selected">{{ text_disabled }}</option>
                   {% endif %}
                 </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="result">{{ form_formula }}</label>
+              <div class="col-sm-10">
+                {{calculator}}
               </div>
             </div>
         </form>

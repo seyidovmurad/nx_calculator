@@ -1,0 +1,80 @@
+@import 'https://fonts.googleapis.com/css?family=Share+Tech+Mono';
+
+
+
+#header {
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+#calc {  
+
+  text-align: center;
+  width: 480px; 
+  display: block;
+  border-radius:8px;
+  border: 1px solid;
+  border-color: #bbb;
+  padding:8px;
+  margin-top:20px;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom: 50px;
+  background: #f1f1f1;
+}
+
+#previous {
+    background: #fff;
+    border: 1px solid #bbb;
+    padding: 8px;
+    margin:16px 12px 10px 16px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    border-radius:8px;
+    width: 77%;
+    -webkit-flex: 1;
+    flex: 1;
+}
+
+
+#result,
+#previous {
+  font-size: 1.4em;
+  text-align: right;
+  
+}
+
+#keyboard {
+  display: inline-block;  
+  text-align: center;
+  margin-bottom:8px;
+}
+
+.row {
+  margin-top: 4px;
+}
+
+.last-row {
+  float:left;
+  margin-top: -11.5%;
+}
+
+button[type=button] {
+  width: 62px;
+  margin: 2px;
+}
+
+.invisible {
+  width:0;
+}
+
+.btn-zero {
+  width: 134px!important;
+}
+
+.btn-result {  
+  float:right;
+  margin-left:4px;  
+  height: 74px;
+}
+

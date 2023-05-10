@@ -24,6 +24,7 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+    
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
@@ -73,6 +74,59 @@
         </div>
       </div>
     </div>
+    {# ////////////////////////////////// #}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+        <div class="pull-right"><button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-route').submit() : false;"><i class="fa fa-trash-o"></i></button></div>
+      </div>
+      
+      <div class="panel-body">
+        <form action="{{ rdelete }}" method="post" enctype="multipart/form-data" id="form-route">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                 <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left">
+                    <p>{{ column_name }}</p>
+                  </td>
+                  <td class="text-left">
+                    <p >Html Id</p>
+                  </td>
+                  {# <td class="text-right">{{ column_action }}</td> #}
+                </tr>
+              </thead>
+              <tbody>
+                  {% if routes %}
+                  {% for route in routes %}
+                  <tr>
+                    <td class="text-center">{% if route.nxc_route_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ route.nxc_route_id }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ route.nxc_route_id }}" />
+                      {% endif %}</td>
+                    <td class="text-left">{{ route.name }}</td>
+                    <td class="text-left">#{{ route.html_id }}</td>
+                    {# <td class="text-right"><a href="" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td> #}
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                <tr>
+                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+    {# ////////////////////////////////// #}
   </div>
 </div>
 {{ footer }}

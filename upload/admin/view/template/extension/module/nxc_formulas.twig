@@ -31,7 +31,7 @@
               <label class="col-sm-2 control-label" for="input-table">{{ form_table_type }}</label>
               <div class="col-sm-10">
                 <select name="table" id="input-table" class="form-control">
-                  <option value="-1">-</option>
+                  <option value="-1">{{text_all}}</option>
                   {% for table in tables %}
                     <option value="{{table.id}}">{{table.name}}</option>
                   {% endfor %}
@@ -65,7 +65,7 @@
               <div class="col-sm-10">
                 
                 <select name="table_id" id="input-status" class="form-control">
-                  <option value="-1">-</option>
+                  <option value="-1">{{text_all}}</option>
                   
                 </select>
               </div>
@@ -79,25 +79,34 @@
 <script>
   $(function() {
       $('#input-table').on('change', function() {
-       $.ajax({
-              url: 'index.php?route=extension/module/nx_calculator/type&user_token=kZF34pPCtgX28Y51UR50QWca1Bi3WyUe&type='+this.value,
-              type: 'get',
-              success: function(json) {
-                if(json.success) {
-                  $('#input-status').empty();
-                  for(let i = 0; i < json.table.length; i++) {
-                    let table = json.table[i];
-                    $('#input-status').append($('<option>', { 
-                        value: table.id,
-                        text : table.name 
-                    }));
+        if(this.value > -1) {
+        $.ajax({
+                url: 'index.php?route=extension/module/nx_calculator/type&user_token={{token}}&type='+this.value,
+                type: 'get',
+                success: function(json) {
+                  if(json.success) {
+                    $('#input-status').empty();
+                    for(let i = 0; i < json.table.length; i++) {
+                      let table = json.table[i];
+                      $('#input-status').append($('<option>', { 
+                          value: table.id,
+                          text : table.name 
+                      }));
+                    }
                   }
+                },
+                error: function(error) {
+                  alert(error);
                 }
-              },
-              error: function(error) {
-                alert(error);
-              }
-          });
+            });
+        }
+        else {
+          $('#input-status').empty();
+          $('#input-status').append($('<option>', { 
+                          value: -1,
+                          text : '{{text_all}}' 
+                      }));
+        }
       });
   });
 </script>
