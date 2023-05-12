@@ -6,10 +6,6 @@
         return $query->rows[0];
     }
 
-    public function getRoute($product_id) {
-      $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_formula_table` AS nft, `".DB_PREFIX."nxc_route` AS nr WHERE nft.nxc_route_id = nr.nxc_route_id AND nft.table_id = $product_id;");
-      return $query->rows[0];
-    }
 
     public function getFormulaFromTable($product_id, $table = 0) {
       //product-0 category-1 manifacture-2

@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container">
       <div class="pull-right">
-        <button type="submit" form="form-news" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
@@ -14,25 +14,29 @@
     </div>
   </div>
   <div class="container" >
+    
     {% if error_warning %}
     <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {# ///////////////////////// #}
+    {% if route_perm %}
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_add_r }}</h3>
+        <div class="pull-right"><button type="submit"  form="form-route" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" ><i class="fa fa-save"></i></button></div>
       </div>
       <div class="panel-body" >
         <form action="{{ route_action }}" method="post" enctype="multipart/form-data"  class="form-horizontal" id="form-route">
+          <input type="hidden" value="route" name="ftype" />
           {# ///////////////////// #}
           <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-name">{{ route_name }}s</label>
             <div class="col-sm-10">
-              <input type="text" name="name" required="required" placeholder="{{ route_name }}" id="input-name"  value="{{ route.name ? route.name : '' }}" class="form-control" />
-              {% if error_warning.name %}
-              <div class="text-danger">{{ error_warning.name }}</div>
+              <input {% if warnings.route_error.name %} style="border-color: red" {% endif %} type="text" name="name" placeholder="{{ route_name }}" id="input-name"  value="{{ route.name ? route.name : '' }}" class="form-control" />
+              {% if warnings.route_error.name %}
+              <span class="text-danger">{{ warnings.route_error.name }}</span>
               {% endif %}
             </div>
           </div>
@@ -40,9 +44,9 @@
           <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-name">{{ route_id }}s</label>
             <div class="col-sm-10">
-              <input type="text" name="html_id" required="required" placeholder="{{ route_id }}" id="input-name"  value="{{ route.html_id ? route.html_id : '' }}" class="form-control" />
-              {% if error_warning.html_id %}
-              <div class="text-danger">{{ error_warning.html_id }}</div>
+              <input {% if warnings.route_error.html_id %} style="border-color: red" {% endif %} type="text" name="html_id"  placeholder="{{ route_id }}" id="input-name"  value="{{ route.html_id ? route.html_id : '' }}" class="form-control" />
+              {% if warnings.route_error.html_id %}
+              <span class="text-danger">{{ warnings.route_error.html_id }}</span>
               {% endif %}
             </div>
           </div>
@@ -55,26 +59,28 @@
               {% endif %}
             </div>
           </div> #}
-          <div style="display: flex; justify-content: end;">
-            <button type="submit"  form="form-route" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" >Add Route</button>
-          </div>
         </form>
       </div>
     </div>
+    {% endif %}
     {# ///////////////////////// #}
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_add }}</h3>
+        <div class="pull-right">
+          <button type="submit" form="form-news" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        </div>
       </div>
       <div class="panel-body">
         
          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-news" class="form-horizontal">
+         <input type="hidden" value="form" name="ftype" />
           <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-name">{{ form_name }}</label>
             <div class="col-sm-10">
-              <input type="text" name="name" required placeholder="{{ form_name }}" id="input-name"  value="{{ form.name ? form.name : '' }}" class="form-control" />
-              {% if error_name %}
-              <div class="text-danger">{{ error_name }}</div>
+              <input type="text" name="name" placeholder="{{ form_name }}" id="input-name"  value="{{ form.name ? form.name : '' }}" class="form-control" />
+               {% if warnings.form_error.name %}
+              <span class="text-danger">{{ warnings.form_error.name }}</span>
               {% endif %}
             </div>
           </div>
@@ -83,9 +89,17 @@
               <label class="col-sm-2 control-label" for="input-status">{{ form_value }}</label>
               <div class="col-sm-10">
                 <select name="value" id="input-status" class="form-control">
-                  <option value="1">Discount</option>
-                  <option value="0" selected="selected">Price</option>
+                  {% if form.value %}
+                    <option value="1" selected="selected">Discount</option>
+                    <option value="0" >Price</option>
+                  {% else %}
+                    <option value="1">Discount</option>
+                    <option value="0" selected="selected">Price</option>
+                  {% endif %}
                 </select>
+                {% if warnings.form_error.value %}
+                  <span class="text-danger">{{ warnings.form_error.value }}</span>
+                {% endif %}
               </div>
             </div>
             <div class="form-group">
@@ -100,11 +114,17 @@
                   <option value="0" selected="selected">{{ text_disabled }}</option>
                   {% endif %}
                 </select>
+                {% if warnings.form_error.status %}
+                  <span class="text-danger">{{ warnings.form_error.status }}</span>
+                {% endif %}
               </div>
             </div>
             <div class="form-group">
               <label class="col-sm-2 control-label" for="result">{{ form_formula }}</label>
               <div class="col-sm-10">
+                {% if warnings.form_error.formula %}
+                <span class="text-danger">{{ warnings.form_error.formula }}</span>
+                {% endif %}
                 {{calculator}}
               </div>
             </div>
@@ -114,3 +134,4 @@
   </div>
 </div>
 {{ footer }}
+

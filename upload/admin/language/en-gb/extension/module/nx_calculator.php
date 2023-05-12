@@ -12,6 +12,7 @@
     $_['text_add_r']       = 'Add Route';
     $_['text_nxc']         = 'Nx Calculator';
     $_['text_formula']     = 'Formulas';
+    $_['text_route']     = 'Routes';
     $_['text_table']       = "Products";
     $_['text_all']         = 'All';
 

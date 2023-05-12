@@ -24,7 +24,7 @@ $(document).ready(function() {
         }
         else {
           eq = eq.slice(0, -1); 
-          $('#previous').val(eq);
+         
         }
       }
       else {

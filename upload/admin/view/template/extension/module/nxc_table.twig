@@ -2,8 +2,9 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"><a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a> <a href="{{ add_to_table }}" data-toggle="tooltip" title="{{ button_table }}" class="btn btn-warning">Add Table</a>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="pull-right">
+        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a> <a href="{{ add_to_table }}" data-toggle="tooltip" title="{{ button_table }}" class="btn btn-warning">Add Table</a>
+        
       </div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
@@ -14,8 +15,8 @@
     </div>
   </div>
   <div class="container-fluid">
-    {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    {% if warning.formula_warnings %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ warning.formula_warnings }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -27,7 +28,10 @@
     
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_formula }}</h3>
+        <div class="pull-right">
+          <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i class="fa fa-trash-o"></i></button>
+        </div>
       </div>
       <div class="panel-body">
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
@@ -35,13 +39,17 @@
             <table class="table table-bordered table-hover">
               <thead>
                 <tr>
-                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\'].fmlcls').prop('checked', this.checked);" /></td>
                   <td class="text-left">
                     <p>{{ column_name }}</p>
+                  </td>
+                  <td class="text-left">
+                    <p>Value</p>
                   </td>
                   <td class="text-center">
                     <p >{{ column_formula }}</p>
                   </td>
+                  <td class="text-center">Status</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -50,12 +58,17 @@
                   {% for form in forms %}
                   <tr>
                     <td class="text-center">{% if form.nxc_formula_id in selected %}
-                      <input type="checkbox" name="selected[]" value="{{ form.nxc_formula_id }}" checked="checked" />
+                      <input type="checkbox" class="fmlcls" name="selected[]" value="{{ form.nxc_formula_id }}" checked="checked" />
                       {% else %}
-                      <input type="checkbox" name="selected[]" value="{{ form.nxc_formula_id }}" />
+                      <input type="checkbox" class="fmlcls" name="selected[]" value="{{ form.nxc_formula_id }}" />
                       {% endif %}</td>
                     <td class="text-left">{{ form.name }}</td>
+                    <td class="text-left">{{ form.value ? 'Discount' : 'Price' }}</td>
                     <td class="text-center">{{ form.formula }}</td>
+                    <td class="text-center" style="display: flex; justify-content: center;">
+                        <p>{{ form.status ? text_enabled : text_disabled}} </p>
+                     
+                    </td>
                     <td class="text-right"><a href="{{ form.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
@@ -68,16 +81,22 @@
             </table>
           </div>
         </form>
-        <div class="row">
+        {# <div class="row">
           <div class="col-sm-6 text-left">{{ pagination }}</div>
           <div class="col-sm-6 text-right">{{ results }}</div>
-        </div>
+        </div> #}
       </div>
     </div>
+    {% if route_perm %}
     {# ////////////////////////////////// #}
+    {% if warning.route_warnings %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ warning.route_warnings }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_route }}</h3>
         <div class="pull-right"><button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-route').submit() : false;"><i class="fa fa-trash-o"></i></button></div>
       </div>
       
@@ -87,7 +106,7 @@
             <table class="table table-bordered table-hover">
               <thead>
                 <tr>
-                 <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                 <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\'].rtcls').prop('checked', this.checked);" /></td>
                   <td class="text-left">
                     <p>{{ column_name }}</p>
                   </td>
@@ -102,9 +121,9 @@
                   {% for route in routes %}
                   <tr>
                     <td class="text-center">{% if route.nxc_route_id in selected %}
-                      <input type="checkbox" name="selected[]" value="{{ route.nxc_route_id }}" checked="checked" />
+                      <input type="checkbox" class="rtcls" name="selected[]" value="{{ route.nxc_route_id }}" checked="checked" />
                       {% else %}
-                      <input type="checkbox" name="selected[]" value="{{ route.nxc_route_id }}" />
+                      <input type="checkbox" class="rtcls" name="selected[]" value="{{ route.nxc_route_id }}" />
                       {% endif %}</td>
                     <td class="text-left">{{ route.name }}</td>
                     <td class="text-left">#{{ route.html_id }}</td>
@@ -120,13 +139,22 @@
             </table>
           </div>
         </form>
-        <div class="row">
+        {# <div class="row">
           <div class="col-sm-6 text-left">{{ pagination }}</div>
           <div class="col-sm-6 text-right">{{ results }}</div>
-        </div>
+        </div> #}
       </div>
     </div>
     {# ////////////////////////////////// #}
+    {% endif %}
   </div>
 </div>
 {{ footer }}
+
+<script>
+  $("#input-status").on('change', function() {
+    let data = $('#form-status').serializeArray();
+    console.log(data);
+    alert(data);
+  })
+</script>

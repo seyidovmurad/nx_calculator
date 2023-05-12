@@ -7,6 +7,18 @@
                                 name = '". $this->db->escape($data['name']) . "';");
         }
 
+        public function addRouteToExistingRoute($url) {
+            $this->db->query("INSERT IGNORE INTO `".DB_PREFIX."nxc_added_route` SET url = '".$this->db->escape($url)."' ;");
+        }
+
+        public function addFormula($data) {
+            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula` SET name = '".$this->db->escape($data['name'])."', value = " .(int)$data['value'].", formula = '" .$this->db->escape($data['formula']). "', status = " .(int)$data['status']." ;");
+        }
+
+        public function addFormulaToTable($data) {
+            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula_table` SET `nxc_formula_id` = '".(int)$data['nxc_formula_id']."', `nxc_route_id` = " .(int)$data['nxc_route_id']. ", `table_id` = " .(int)$data['table_id']. ", `table` = " .(int)$data['table'].", `priority` = ".($data['table'] < 0 ? 0 : 1)." ;");
+        }
+
 
         public function getRoutes() {
             $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_route`");
@@ -21,53 +33,6 @@
         public function getFormula($id) {
             $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_formula` WHERE nxc_formula_id = $id;");
             return $query->rows[0];
-        }
-
-        public function editFormula($data) {
-            $this->db->query("UPDATE `".DB_PREFIX."nxc_formula` SET `formula`='".$data['formula']."' WHERE `nxc_formula_id` = ".$data['formula_id'].";");
-        }
-
-        public function getProducts($id) {
-            $products = array();
-            $query = $this->db->query("SELECT DISTINCT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON nft.table_id = p.product_id AND nft.table = 0 WHERE nft.nxc_formula_id = $id;");
-            $products = array_merge($products, $query->rows);
-            $query = $this->db->query("SELECT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."product_to_category` AS ptc ON ptc.product_id = p.product_id JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON nft.table_id = ptc.category_id AND nft.table = 1 WHERE nft.nxc_formula_id = $id;");
-            $products = array_merge($products, $query->rows);
-            $query = $this->db->query("SELECT DISTINCT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."manufacturer` AS m JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON p.manufacturer_id = m.manufacturer_id AND nft.table_id = m.manufacturer_id AND nft.table = 2 WHERE nft.nxc_formula_id = $id;");
-            $products = array_merge($products, $query->rows);
-            return array_map("unserialize", array_unique(array_map("serialize", $products)));
-        }
-        public function routeExist($route) {
-            $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_added_route` WHERE `url`= '$route';");
-            return $query->rows != null;
-        }
-
-        public function addRouteToExistingRoute($url) {
-            $this->db->query("INSERT IGNORE INTO `".DB_PREFIX."nxc_added_route` SET url = '".$this->db->escape($url)."' ;");
-        }
-
-        public function addFormula($data) {
-            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula` SET name = '".$this->db->escape($data['name'])."', value = " .(int)$data['value'].", formula = '" .$this->db->escape($data['formula']). "', status = " .(int)$data['status']." ;");
-        }
-
-        public function addFormulaToTable($data) {
-            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula_table` SET `nxc_formula_id` = '".(int)$data['nxc_formula_id']."', `nxc_route_id` = " .(int)$data['nxc_route_id']. ", `table_id` = " .(int)$data['table_id']. ", `table` = " .(int)$data['table'].", `priority` = ".($data['table'] < 0 ? 0 : 1)." ;");
-        }
-
-        public function getTotalFormulas() {
-            $count = $this->db->query("SELECT COUNT(`nxc_formula_id`) FROM `".DB_PREFIX."nxc_formula` WHERE 1;");
-        }
-
-        public function autoComplete($searchTerm) {
-            $query = $this->db->query("SELECT pd.name, p.product_id AS id FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id WHERE pd.name LIKE '%".$searchTerm."%' AND status = 1 ORDER BY name ASC;");
-            return $query->rows;
-        }
-
-        public function delete($array) {
-            $ids = implode("','", $array);
-            $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula` WHERE `nxc_formula_id` IN ('".$ids."')");
-            $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_formula_id` IN ('".$ids."')");
-            
         }
 
         public function getTable($type, $id) {
@@ -97,6 +62,34 @@
             return isset($query->rows) ? $query->rows : array();
         }
 
+        public function getProducts($id) {
+            $products = array();
+            $query = $this->db->query("SELECT DISTINCT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON nft.table_id = p.product_id AND nft.table = 0 WHERE nft.nxc_formula_id = $id;");
+            $products = array_merge($products, $query->rows);
+            $query = $this->db->query("SELECT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."product_to_category` AS ptc ON ptc.product_id = p.product_id JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON nft.table_id = ptc.category_id AND nft.table = 1 WHERE nft.nxc_formula_id = $id;");
+            $products = array_merge($products, $query->rows);
+            $query = $this->db->query("SELECT DISTINCT p.product_id, pd.name FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id JOIN `".DB_PREFIX."manufacturer` AS m JOIN `".DB_PREFIX."nxc_formula_table` AS nft ON p.manufacturer_id = m.manufacturer_id AND nft.table_id = m.manufacturer_id AND nft.table = 2 WHERE nft.nxc_formula_id = $id;");
+            $products = array_merge($products, $query->rows);
+            return array_map("unserialize", array_unique(array_map("serialize", $products)));
+        }
+
+        public function getTotalFormulas() {
+            $count = $this->db->query("SELECT COUNT(`nxc_formula_id`) FROM `".DB_PREFIX."nxc_formula` WHERE 1;");
+        }
+
+        
+        public function editFormula($data) {
+            $this->db->query("UPDATE `".DB_PREFIX."nxc_formula` SET `formula`='".$data['formula']."', `status`='".$data['status']."', `value`='".$data['value']."' WHERE `nxc_formula_id` = ".$data['formula_id'].";");
+        }
+
+        
+        public function delete($array) {
+            $ids = implode("','", $array);
+            $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula` WHERE `nxc_formula_id` IN ('".$ids."')");
+            $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_formula_id` IN ('".$ids."')");
+            
+        }
+
         public function deleteTable($array, $formula_id, $table) {
             $ids = implode("','", $array);
             $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `table_id` IN ('$ids') AND `nxc_formula_id` = $formula_id AND `table` = $table");
@@ -106,5 +99,16 @@
             $ids = implode("','", $array);
             $this->db->query("DELETE FROM `".DB_PREFIX."nxc_route` WHERE `nxc_route_id` IN ('".$ids."')");
             $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_route_id` IN ('".$ids."')");
+        }
+
+
+        public function routeExist($route) {
+            $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_added_route` WHERE `url`= '$route';");
+            return $query->rows != null;
+        }
+
+        public function autoComplete($searchTerm) {
+            $query = $this->db->query("SELECT pd.name, p.product_id AS id FROM `".DB_PREFIX."product` AS p JOIN `".DB_PREFIX."product_description` AS pd ON p.product_id = pd.product_id WHERE pd.name LIKE '%".$searchTerm."%' AND status = 1 ORDER BY name ASC;");
+            return $query->rows;
         }
     }
