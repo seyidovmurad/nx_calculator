@@ -1,0 +1,23 @@
+edit formula table
+autocomplete
+choose more than one category
+pagination
+edit-formula show all products
+explicte products from formula
+
+edit route-?
+
++priority
++adding url-? 
++language problem
++product.name to product.model
++all products
++form validation
++backend validation
++add status
++permission
++table_title
++when you delete without selecting it will show warning
+
+
+
