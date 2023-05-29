@@ -26,15 +26,30 @@
       <div class="panel-body">
         
          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-news" class="form-horizontal">
-          
+            {% if selected.nxc_formula_table_id %}
+            <input type="hidden" value="{{selected.nxc_formula_table_id}}" name="nxc_formula_table_id" />
+            {% endif %}
            <div class="form-group">
               <label class="col-sm-2 control-label" for="input-table">{{ form_table_type }}</label>
               <div class="col-sm-10">
                 <select name="table" id="input-table" class="form-control" {% if warnings.table %} style="border-color: red" {% endif %}>
-                  <option value="-1">{{text_all}}</option>
-                  {% for table in tables %}
-                    <option value="{{table.id}}">{{table.name}}</option>
-                  {% endfor %}
+                  {% if selected %}
+                    <option {% if selected.table == -1 %} selected="selected" {% endif %} value="-1">{{text_all}}</option>
+                    {% for table in tables %}
+                      {% if selected.table == table.id %} 
+                      <option value="{{table.id}}" selected="selected">{{table.name}}</option>
+                      {% else %}
+                      <option value="{{table.id}}">{{table.name}}</option>
+                      {% endif %}
+                      
+                    {% endfor %}
+                  {% else %}
+                    <option  selected="selected" value="-1">{{text_all}}</option>
+                    {% for table in tables %}
+                      <option value="{{table.id}}">{{table.name}}</option>
+                    {% endfor %}
+                  {% endif %}
+                  
                 </select>
                 {% if warnings.table %}
                   <span style="font-size: .8em; color: red;">{{warnings.table }}</span>
@@ -48,7 +63,11 @@
                 <select name="nxc_route_id" id="input-route" class="form-control" {% if warnings.route %} style="border-color: red" {% endif %} >
                   <option value="-1">-</option>
                   {% for route in routes %}
+                    {% if selected.nxc_route_id == route.nxc_route_id %} 
+                    <option selected="selected" value="{{route.nxc_route_id}}">{{route.name}} #{{route.html_id}}</option>
+                    {% else %}
                     <option value="{{route.nxc_route_id}}">{{route.name}} #{{route.html_id}}</option>
+                    {% endif %}
                   {% endfor %}
                 </select>
                 {% if warnings.route %}
@@ -63,7 +82,11 @@
                 <select name="nxc_formula_id" id="input-formula" class="form-control" {% if warnings.formula %} style="border-color: red" {% endif %}>
                   <option value="-1">-</option>
                   {% for formula in formulas %}
+                    {% if selected.nxc_formula_id == formula.nxc_formula_id %} 
+                    <option selected="selected" value="{{formula.nxc_formula_id}}">{{formula.name}} -> {{formula.formula}}</option>
+                    {% else %}
                     <option value="{{formula.nxc_formula_id}}">{{formula.name}} -> {{formula.formula}}</option>
+                    {% endif %}
                   {% endfor %}
                 </select>
                 {% if warnings.formula %}
@@ -72,15 +95,41 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="col-sm-2 control-label" for="input-status">{{ form_table }}</label>
+              <label class="col-sm-2 control-label" for="input-tableid">{{ form_table }}</label>
               <div class="col-sm-10">
                 
-                <select name="table_id" id="input-status" class="form-control" {% if warnings.table_id %} style="border-color: red" {% endif %}>
+                <select name="table_id" id="input-tableid" class="form-control" {% if warnings.table_id %} style="border-color: red" {% endif %}>
                   <option value="-1">{{text_all}}</option>
                   
                 </select>
                 {% if warnings.table_id %}
                   <span style="font-size: .8em; color: red;">{{warnings.table_id}}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="form-group required">
+              <label class="col-sm-2 control-label" for="input-priority">{{ text_priority }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="priority" placeholder="{{ text_priority }}" id="input-priority"  value="{{ selected.priority ? selected.priority : 0 }}" class="form-control" />
+                {% if warnings.priority %}
+                <span class="text-danger">{{ warnings.priority }}</span>
+                {% endif %}
+              </div>
+           </div>
+           <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-status">{{ form_status }}</label>
+              <div class="col-sm-10">
+                <select name="status" id="input-status" class="form-control">
+                  {% if selected.status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+                {% if warnings.form_error.status %}
+                  <span class="text-danger">{{ warnings.form_error.status }}</span>
                 {% endif %}
               </div>
             </div>
@@ -92,17 +141,61 @@
 {{ footer }}
 <script>
   $(function() {
-      $('#input-table').on('change', function() {
+      $('#input-table').on('change', loadTables);
+      $(window).on( 'load', () => {
+        const select =  $('#input-table').val();
+        
+        if(select > -1) {
+        $.ajax({
+                url: 'index.php?route=extension/module/nx_calculator/type&user_token={{token}}&type='+select,
+                type: 'get',
+                success: function(json) {
+                  if(json.success) {
+                    $('#input-tableid').empty();
+                    for(let i = 0; i < json.table.length; i++) {
+                      let table = json.table[i];
+                      if(table.id == '{{selected.table_id}}') {
+                        $('#input-tableid').append($('<option>', { 
+                          value: table.id,
+                          text : table.name,
+                          selected: 'selected'
+                        }));
+                      }
+                      else {
+                        $('#input-tableid').append($('<option>', { 
+                            value: table.id,
+                            text : table.name 
+                        }));
+                      }
+                      
+                    }
+                  }
+                },
+                error: function(error) {
+                  alert(error);
+                }
+            });
+        }
+        else {
+          $('#input-tableid').empty();
+          $('#input-tableid').append($('<option>', { 
+                          value: -1,
+                          text : '{{text_all}}' 
+                      }));
+        }
+      });
+
+      function loadTables() {
         if(this.value > -1) {
         $.ajax({
                 url: 'index.php?route=extension/module/nx_calculator/type&user_token={{token}}&type='+this.value,
                 type: 'get',
                 success: function(json) {
                   if(json.success) {
-                    $('#input-status').empty();
+                    $('#input-tableid').empty();
                     for(let i = 0; i < json.table.length; i++) {
                       let table = json.table[i];
-                      $('#input-status').append($('<option>', { 
+                      $('#input-tableid').append($('<option>', { 
                           value: table.id,
                           text : table.name 
                       }));
@@ -115,12 +208,12 @@
             });
         }
         else {
-          $('#input-status').empty();
-          $('#input-status').append($('<option>', { 
+          $('#input-tableid').empty();
+          $('#input-tableid').append($('<option>', { 
                           value: -1,
                           text : '{{text_all}}' 
                       }));
         }
-      });
+      }
   });
 </script>

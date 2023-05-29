@@ -49,7 +49,8 @@
                   <td class="text-center">
                     <p >{{ column_formula }}</p>
                   </td>
-                  <td class="text-center">Status</td>
+                  {# <td class="text-center">{{ column_text }}</td> #}
+                  <td class="text-center">{{ column_status }}</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -65,11 +66,76 @@
                     <td class="text-left">{{ form.name }}</td>
                     <td class="text-left">{{ form.value ? 'Discount' : 'Price' }}</td>
                     <td class="text-center">{{ form.formula }}</td>
-                    <td class="text-center" style="display: flex; justify-content: center;">
+                    {# <td class="text-center">{{ form.text }}</td> #}
+                    <td class="text-center" >
                         <p>{{ form.status ? text_enabled : text_disabled}} </p>
                      
                     </td>
                     <td class="text-right"><a href="{{ form.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                <tr>
+                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        {# <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div> #}
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_formula_table }}</h3>
+        <div class="pull-right">
+          <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-table').submit() : false;"><i class="fa fa-trash-o"></i></button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <form action="{{ ftdelete }}" method="post" enctype="multipart/form-data" id="form-table">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\'].fmlcls').prop('checked', this.checked);" /></td>
+                 
+                  <td class="text-left">
+                    <p>{{ column_html }}</p>
+                  </td>
+                  <td class="text-left">
+                    <p >{{ column_formula }}</p>
+                  </td>
+                   <td class="text-center">
+                    <p>{{ column_priority }}</p>
+                  </td>
+                  <td class="text-center">{{ 'Table' }}</td>
+                  <td class="text-center">{{ column_status }}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                  {% if formtables %}
+                  {% for formtable in formtables %}
+                  <tr>
+                    <td class="text-center">{% if formtable.nxc_formula_id in selected %}
+                      <input type="checkbox" class="fmlcls" name="selected[]" value="{{ formtable.nxc_formula_id }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" class="fmlcls" name="selected[]" value="{{ formtable.nxc_formula_id }}" />
+                      {% endif %}</td>
+                    <td class="text-left">{{ formtable.html_id }}</td>
+                    <td class="text-left">{{ formtable.formula }}</td>
+                    <td class="text-center">{{ formtable.priority }}</td>
+                    <td class="text-center">{{ formtable.table }}</td>
+                    <td class="text-center" >
+                        <p>{{ formtable.status ? text_enabled : text_disabled}} </p>
+                     
+                    </td>
+                    <td class="text-right"><a href="{{ formtable.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}

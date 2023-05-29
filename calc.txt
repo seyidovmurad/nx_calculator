@@ -1,4 +1,4 @@
-edit formula table
++edit formula table
 autocomplete
 choose more than one category
 pagination

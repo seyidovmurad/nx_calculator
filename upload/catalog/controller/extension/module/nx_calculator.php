@@ -23,7 +23,7 @@
 
                 $this->load->model('extension/module/nx_calculator');
                 $form = $this->model_extension_module_nx_calculator->getFormulaAdv($id);
-
+               
                 $this->load->model('catalog/product');
                 $product = $this->model_catalog_product->getProduct($id);
 
@@ -33,10 +33,10 @@
                         if(!$this->arrayContain($json['nxc'], $f['html_id'])) {
                             $price = $f['value'] ? (isset($product['special']) ? $product['special'] : $product['price']) : $product['price'];
                             $replaced = str_replace('[value]', $price, $f['formula']);
-                            $json['nxc'][] = array('price' => $price, 'formula' => $replaced, 'html_id' => $f['html_id']);
+                            $json['nxc'][] = array('price' => $price, 'formula' => $replaced, 'html_id' => $f['html_id'], 'text' => $f['text']);
                         }
                     }
-                   $json['success'] = true;
+                    $json['success'] = true;
                     
                     $this->response->setOutput(json_encode($json));
                 }

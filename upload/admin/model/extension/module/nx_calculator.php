@@ -13,10 +13,25 @@
 
         public function addFormula($data) {
             $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula` SET name = '".$this->db->escape($data['name'])."', value = " .(int)$data['value'].", formula = '" .$this->db->escape($data['formula']). "', status = " .(int)$data['status']." ;");
+
+            // $formula_id = $this->db->getLastId();
+            // $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "nxc_language` (
+            //     `nxc_language_id` int(11) NOT NULL AUTO_INCREMENT,
+            //     `nxc_formula_id` int(11) NOT NULL,
+            //     `language_id` int(11) NOT NULL,
+            //     `text` varchar(50) NOT NULL,
+            //     PRIMARY KEY (`nxc_language_id`))"
+            // );
+            
+            // foreach($data['text'] as $lang=> $text) {
+
+            //     $this->db->query("INSERT INTO `".DB_PREFIX."nxc_language`(`nxc_formula_id`, `language_id`, `text`) VALUES ('$formula_id','$lang','$text')");
+            // }
+        
         }
 
         public function addFormulaToTable($data) {
-            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula_table` SET `nxc_formula_id` = '".(int)$data['nxc_formula_id']."', `nxc_route_id` = " .(int)$data['nxc_route_id']. ", `table_id` = " .(int)$data['table_id']. ", `table` = " .(int)$data['table'].", `priority` = ".($data['table'] < 0 ? 0 : 1)." ;");
+            $this->db->query("INSERT INTO `".DB_PREFIX."nxc_formula_table` SET `nxc_formula_id` = '".(int)$data['nxc_formula_id']."', `nxc_route_id` = " .(int)$data['nxc_route_id']. ", `table_id` = " .(int)$data['table_id']. ", `table` = " .(int)$data['table'].", `priority` = ".(int)$data['priority']. ", `status` = ".(int)$data['status']." ;");
         }
 
 
@@ -33,6 +48,15 @@
         public function getFormula($id) {
             $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_formula` WHERE nxc_formula_id = $id;");
             return $query->rows[0];
+        }
+
+        public function getFormText($id) {
+            $query = $this->db->query("SELECT language_id, text FROM `".DB_PREFIX."nxc_language` WHERE nxc_formula_id = $id;");
+
+            foreach($query->rows as $obj) {
+                $array[$obj['language_id']] = $obj['text'];
+            }
+            return isset($array) ? $array : array();
         }
 
         public function getTable($type, $id) {
@@ -77,11 +101,31 @@
             $count = $this->db->query("SELECT COUNT(`nxc_formula_id`) FROM `".DB_PREFIX."nxc_formula` WHERE 1;");
         }
 
-        
-        public function editFormula($data) {
-            $this->db->query("UPDATE `".DB_PREFIX."nxc_formula` SET `formula`='".$data['formula']."', `status`='".$data['status']."', `value`='".$data['value']."' WHERE `nxc_formula_id` = ".$data['formula_id'].";");
+        public function getFormulaTable($id) {
+            $query = $this->db->query("SELECT * FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_formula_table_id` = $id;");
+            return $query->rows[0];
         }
 
+        public function getFormulaTables() {
+            $query = $this->db->query("SELECT nft.nxc_formula_table_id, CONCAT(nf.name, '-> ', nf.formula) AS formula, nft.table, CONCAT(nr.name, ' #', nr.html_id) AS html_id, nft.status, nft.priority FROM `".DB_PREFIX."nxc_formula_table` AS nft JOIN `".DB_PREFIX."nxc_route` AS nr ON nft.nxc_route_id = nr.nxc_route_id JOIN `".DB_PREFIX."nxc_formula` AS nf ON nft.nxc_formula_id = nf.nxc_formula_id;");
+            return $query->rows;
+        }
+
+        
+        public function editFormula($data) {
+            $this->db->query("UPDATE `".DB_PREFIX."nxc_formula` SET `formula`='".$data['formula']."', `status`='".$data['status']."', `value`='".$data['value'] ."' WHERE `nxc_formula_id` = ".$data['formula_id'].";");
+
+            foreach($data['text'] as $lang => $text) {
+
+                $this->db->query("INSERT INTO `".DB_PREFIX."nxc_language` (`nxc_formula_id`, `language_id`, `text`) SELECT ".$data['formula_id'].", $lang, '$text' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `".DB_PREFIX."nxc_language` WHERE nxc_formula_id = ".$data['formula_id']." AND language_id = $lang);");
+                $this->db->query("UPDATE `".DB_PREFIX."nxc_language` SET `text`='$text' WHERE nxc_formula_id = ".$data['formula_id']." AND language_id = $lang;");
+            }
+            
+        }
+
+        public function editFormulaTable($data) {
+            $this->db->query("UPDATE `".DB_PREFIX."nxc_formula_table` SET `nxc_formula_id`='".(int)$data['nxc_formula_id']."',`nxc_route_id`='".(int)$data['nxc_route_id']."',`table_id`='".(int)$data['table_id']."',`priority`='".(int)$data['priority']."',`status`='".(int)$data['status']."',`table`='".(int)$data['table']."' WHERE `nxc_formula_table_id` = ".(int)$data['nxc_formula_table_id'].";");
+        }
         
         public function delete($array) {
             $ids = implode("','", $array);
@@ -99,6 +143,11 @@
             $ids = implode("','", $array);
             $this->db->query("DELETE FROM `".DB_PREFIX."nxc_route` WHERE `nxc_route_id` IN ('".$ids."')");
             $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_route_id` IN ('".$ids."')");
+        }
+
+        public function deleteFormulaTable($array) {
+            $ids = implode("','", $array);
+            $this->db->query("DELETE FROM `".DB_PREFIX."nxc_formula_table` WHERE `nxc_formula_table_id` IN ('".$ids."')");
         }
 
 

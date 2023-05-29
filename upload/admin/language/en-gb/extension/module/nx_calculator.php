@@ -6,12 +6,14 @@
     $_['heading_edit'] = 'Edit Formula';
 
     $_['text_module']      = 'Modules';
+    $_['text_priority']      = 'Priority';
     $_['text_success']     = 'Success: You have modified Nx Calculator!';
     $_['text_edit']        = 'Edit';
     $_['text_add']         = 'Add Formula';
     $_['text_add_r']       = 'Add Route';
     $_['text_nxc']         = 'Nx Calculator';
     $_['text_formula']     = 'Formulas';
+    $_['text_formula_table']     = 'Table';
     $_['text_route']     = 'Routes';
     $_['text_table']       = "Products";
     $_['text_all']         = 'All';
@@ -34,6 +36,7 @@
 
      //form
      $_['form_name']       = 'Formula Name';
+     $_['form_text']       = 'Formula Text';
      $_['form_status']     = 'Formula Status';
      $_['form_formula']       = 'Formula';
      $_['form_route']       = 'Formula Route';
@@ -50,6 +53,9 @@
 
      //column
      $_['column_name'] = 'Name';
+     $_['column_html'] = 'Html Id';
+     $_['column_text'] = 'Text';
+     $_['column_priority'] = 'Priority';
      $_['column_status'] = 'Status';
      $_['column_action'] = 'Action';
      $_['column_formula'] = 'Formula';
